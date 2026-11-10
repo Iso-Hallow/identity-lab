@@ -7,9 +7,17 @@
 Показать живой стенд:
 - создание пользователей в AD
 - выпуск сертификата через AD CS (Enterprise Root CA)
-- ротация сертификатов (auto-enrollment)
+- ручная ротация сертификата (auto-enrollment описан как следующий шаг в `docs/certificates.md`)
 - LDAPS-аутентификация с валидацией CA на Linux-клиенте
 - Python-клиент (Flask + ldap3): логин/пароль → OK / FAIL
+
+## Требования
+
+- Hyper-V включён на хосте (Windows 10/11 Pro или Windows Server)
+- ISO Windows Server 2016 Evaluation (Desktop Experience)
+- ISO Debian (12 или новее)
+- Свободно ~100 ГБ на хосте (2 VM + checkpoint)
+- Базовые навыки PowerShell и bash
 
 ## Схема
 
@@ -65,7 +73,6 @@ Windows host (Hyper-V), vEthernet lab-net: 192.168.100.1/24
 5. Контроллер домена проверяет `userPrincipalName` и пароль
 6. Ответ возвращается в браузер: `Result: OK` или `Result: FAIL (LDAPBindError)`
 
-
 ## Изоляция
 
 - `lab-net` - Internal-свитч Hyper-V, не связан с физической сетью
@@ -80,3 +87,17 @@ Windows host (Hyper-V), vEthernet lab-net: 192.168.100.1/24
 - `LDAPServerIntegrity = 1` - простой LDAP на 389 закрыт, работает только 636
 - Windows Server 2016 Evaluation: 180 дней, потом потребуется переустановка или продление (для лаборатории - не критично)
 - Flask development server, не production WSGI - для демо допустимо
+
+## Проверка
+
+```bash
+# С Debian (192.168.100.20):
+openssl s_client -connect dc01.lab.local:636 -showcerts
+# ожидаемо: Verify return code: 0 (ok)
+
+ldapsearch -H ldaps://dc01.lab.local:636 -D "testuser@lab.local" -W -b "dc=lab,dc=local" -s base
+# ожидаемо: result: 0 Success
+
+curl -s -X POST -d "u=testuser&p=P@ssw0rd123!" http://localhost:5000/
+# ожидаемо: Result: OK
+```
