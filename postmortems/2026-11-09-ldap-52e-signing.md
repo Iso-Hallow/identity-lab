@@ -21,6 +21,18 @@
 
 Параметр реестра `HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters\LDAPServerIntegrity` был установлен в `1` (требуется подпись LDAP). В этом режиме контроллер домена отклоняет простые bind без защиты целостности, возвращая 52e даже при верном пароле. Это политика безопасности по умолчанию, а не баг.
 
+## Что проверяли (и что не сработало)
+
+| Гипотеза | Как проверяли | Результат |
+|---|---|---|
+| Неверный пароль | Сброс пароля через `dsa.msc`, повторный bind | Та же ошибка 52e |
+| Учётка заблокирована | `Get-ADUser testuser -Properties LockedOut, Enabled, PasswordExpired` | `LockedOut=False`, `Enabled=True`, `PasswordExpired=False` |
+| Неверный UPN/формат логина | Пробовали `testuser@lab.local`, `LAB\testuser`, `cn=Test User,ou=...` | Все три - 52e |
+| Проблема на стороне клиента (Debian) | `LDP.exe` на самом DC - тот же bind | 52e (значит, не клиент) |
+| Сеть/DNS | `ping`, `nslookup`, `telnet dc01.lab.local 389` | Всё доступно |
+| Анонимный bind как тест | `ldapsearch -x -H ldap://dc01...` без `-D` | `result: 1 Operations error` (норма для AD) |
+| **Подпись LDAP** | `Get-ItemProperty ... LDAPServerIntegrity` | **`= 1`** ← вот причина |
+
 ## Решение
 
 1. Для первичной проверки базового LDAP временно установить `LDAPServerIntegrity = 0` и перезапустить службу `NTDS`. После этого bind под `testuser@lab.local` проходит с `result: 0 Success`.
