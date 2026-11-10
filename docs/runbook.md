@@ -305,10 +305,3 @@ Checkpoint-VM -Name "DC01" -SnapshotName "clean-before-ad"
 # ... если что-то сломалось:
 Restore-VMSnapshot -VMName "DC01" -Name "clean-before-ad" -Confirm:$false
 ```
-
-### Если AD сломан, а VM жалко
-
-- Войти в **Directory Services Restore Mode** (F8 при загрузке).
-- Или -**проще** -снести VM и пройти runbook заново. Для лаборатории это **быстрее**, чем чинить AD.
-
-> **Совет:** делайте `Checkpoint-VM` **перед каждым этапом** (перед установкой AD DS, перед AD CS, перед выдачей сертификата). Если этап сломался -откат за 30 секунд, а не «переустановка с нуля».
