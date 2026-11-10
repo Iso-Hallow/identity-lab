@@ -38,7 +38,7 @@ Windows host (Hyper-V), vEthernet lab-net: 192.168.100.1/24
 3. Роли AD DS + DNS → домен `lab.local`
 4. AD CS (Enterprise Root CA) → шаблон `LDAPS-Template` → сертификат для DC01
 5. Экспорт корневого CA на Debian: `/usr/local/share/ca-certificates/` + `update-ca-certificates`
-6. `lab/client/app.py` — Flask + ldap3, `Tls(validate=CERT_REQUIRED)`
+6. `lab/client/app.py` - Flask + ldap3, `Tls(validate=CERT_REQUIRED)`
 
 Подробно: `docs/runbook.md`.
 
@@ -55,3 +55,28 @@ Windows host (Hyper-V), vEthernet lab-net: 192.168.100.1/24
 ## Обезличено
 
 Все IP, имена и пароли - лабораторные (`lab.local`, `192.168.100.0/24`, `testuser`).
+
+## Поток аутентификации
+
+1. Браузер на хосте отправляет HTTP POST на `http://192.168.100.20:5000/`
+2. Flask-приложение на Debian принимает логин и пароль
+3. Приложение открывает LDAPS-соединение с `dc01.lab.local:636` через `ldap3`
+4. TLS-соединение валидируется корневым CA из `/etc/ssl/certs/lab-root-ca.pem`
+5. Контроллер домена проверяет `userPrincipalName` и пароль
+6. Ответ возвращается в браузер: `Result: OK` или `Result: FAIL (LDAPBindError)`
+
+
+## Изоляция
+
+- `lab-net` - Internal-свитч Hyper-V, не связан с физической сетью
+- Существующие VM (Flask, Apache, Nextcloud) находятся в других сетях и не затрагиваются
+- Домашний роутер не используется как DNS для домена (это сломало бы AD)
+- Единственная точка соприкосновения с внешним миром - временное подключение Debian к интернет-свитчу для `apt`/`git`
+
+## Ограничения текущей конфигурации
+
+- IP на Debian не сохраняется после перезагрузки (добавляется вручную через `ip addr add`)
+- DNS на Debian прописан через `resolv.conf.head`, потому что `dhcpcd` перегенерирует `/etc/resolv.conf`
+- `LDAPServerIntegrity = 1` - простой LDAP на 389 закрыт, работает только 636
+- Windows Server 2016 Evaluation: 180 дней, потом потребуется переустановка или продление (для лаборатории - не критично)
+- Flask development server, не production WSGI - для демо допустимо
