@@ -74,8 +74,12 @@ Install-ADDSForest -DomainName "lab.local" -DomainNetbiosName "LAB" -InstallDns 
 
 1. Создать пользователя (можно через `dsa.msc` или PowerShell):
 ```
-
-## New-ADUser -Name "Test User" -SamAccountName "testuser" -UserPrincipalName "testuser@lab.local" -AccountPassword (ConvertTo-SecureString "P@ssw0rd123!" -AsPlainText -Force) -Enabled true - ChangePasswordAtLogonfalse
+```
+New-ADUser -Name "Test User" -SamAccountName "testuser" `
+  -UserPrincipalName "testuser@lab.local" `
+  -AccountPassword (ConvertTo-SecureString "P@ssw0rd123!" -AsPlainText -Force) `
+  -Enabled $true -ChangePasswordAtLogon $false
+```
 
 ```
 ## 5. AD CS (Enterprise Root CA)
@@ -146,8 +150,8 @@ Install-ADDSForest -DomainName "lab.local" -DomainNetbiosName "LAB" -InstallDns 
 4. Перенести `lab-root-ca.pem` на Debian. Удобный способ - через SMB с хоста:
 ```
 
-## net use \192.168.100.10\C /user:LAB\Администратор "пароль" copy \\192.168.100.10\C\lab-root-ca.pem C:\lab-root-ca.pem
-## net use \192.168.100.10\C$ /delete
+## net use \\192.168.100.10\C /user:LAB\Администратор "пароль" copy \\192.168.100.10\C\lab-root-ca.pem C:\lab-root-ca.pem
+## net use \\192.168.100.10\C$ /delete
 ## scp C:\lab-root-ca.pem leo@192.168.100.20:~/
 
 ```
