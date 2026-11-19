@@ -39,6 +39,20 @@ Windows host (Hyper-V), vEthernet lab-net: 192.168.100.1/24
 - Python FAIL: `POST /` с неверным паролем → `Result: FAIL (LDAPBindError)`
 - `LDAPServerIntegrity = 1`: простой LDAP на 389 отклоняется, работает только 636
 
+## Демонстрация
+
+### AD Users
+![AD Users](docs/screenshots/01-ad-users.png)
+
+### Сертификат DC01
+![DC01 Certificate](docs/screenshots/02-dc-cert.png)
+
+### Успешная аутентификация через LDAPS
+![Login OK](docs/screenshots/03-login-ok.png)
+
+### Отказ при неверном пароле
+![Login Fail](docs/screenshots/04-login-fail.png)
+
 ## Как поднять (кратко)
 
 1. Hyper-V: Internal-свитч `lab-net`, подсеть `192.168.100.0/24`
