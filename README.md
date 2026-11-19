@@ -53,6 +53,16 @@ Windows host (Hyper-V), vEthernet lab-net: 192.168.100.1/24
 ### Отказ при неверном пароле
 ![Login Fail](docs/screenshots/04-login-fail.png)
 
+### Шаблон сертификата (Renewal Period)
+![Template Renewal](docs/screenshots/05-template-renewal.png)
+
+### LDAPS слушает 636
+![LDAPS Listening](docs/screenshots/06-ldaps-listening.png)
+
+### LDAPS bind: result 0 Success
+![LDAPS bind success](docs/screenshots/07-ldapsearch-success.png)
+
+
 ## Как поднять (кратко)
 
 1. Hyper-V: Internal-свитч `lab-net`, подсеть `192.168.100.0/24`
